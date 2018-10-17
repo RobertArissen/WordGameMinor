@@ -78,6 +78,9 @@ module.exports = __webpack_require__(1);
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Letter__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Player__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Lazer__ = __webpack_require__(7);
+/* Import Objects */
+
 
 
 
@@ -102,13 +105,20 @@ var keys = [false, false, false];
 var maxLettersInGame = 24;
 var lettersInGame = [];
 var letterSpeed = 1;
+var collidedLetterIndex = -1;
 
 /*  Player */
 var playerX = WIDTH / 2;
 var playerY = HEIGHT - 30;
-var playerSpeed = 6;
+var playerSpeed = 4;
 var player = new __WEBPACK_IMPORTED_MODULE_1__Player__["a" /* default */](game);
 
+/* Lazers */
+var lazerLoaded = true;
+var lazers = [];
+var lazerReloadDistance = playerY - 120;
+
+/* Draw Functions */
 function DrawPlayer() {
     player.draw(playerX, playerY);
 }
@@ -123,17 +133,68 @@ function DrawLetters() {
     for (var i = 0; i < lettersInGame.length; i++) {
         var currentLetter = lettersInGame[i];
 
-        /* Set letter to top */
-        if (currentLetter.y > HEIGHT + currentLetter.height) {
-            currentLetter.y = 0;
-            currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
-        }
+        if (currentLetter.health <= 0) {
+            lettersInGame.splice(i, 1);
+            currentLetter.isDead();
+        } else {
+            /* Set letter to top */
+            if (currentLetter.y > HEIGHT + currentLetter.height) {
+                currentLetter.y = 0;
+                currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
+                currentLetter.randomLetter();
+            }
 
-        currentLetter.setSpeed(letterSpeed);
-        currentLetter.draw();
+            currentLetter.setSpeed(letterSpeed);
+            currentLetter.draw();
+        }
     }
 }
 
+function DrawLazers() {
+    /* Kijk als de vorige lazer is ver genoeg voor een nieuwe lazer */
+    if (lazers.length != 0) {
+        if (lazers[lazers.length - 1].y <= lazerReloadDistance) {
+            lazerLoaded = true;
+        }
+    } else {
+        lazerLoaded = true;
+    }
+
+    for (var i = 0; i < lazers.length; i++) {
+        var currentLazer = lazers[i];
+
+        /* Als die nog op het scherm is, teken hem stuk hoger anders verwijderen */
+        if (currentLazer.y > -20) {
+            currentLazer.draw();
+        } else {
+            lazers.splice(i, 1);
+        }
+    }
+}
+/* End draw Functions */
+
+/* Collision Function */
+function CheckCollision() {
+    for (var i = 0; i < lettersInGame.length; i++) {
+        var currentLetter = lettersInGame[i];
+
+        if (collidedLetterIndex == lettersInGame.indexOf(currentLetter) && currentEnemy.y < HEIGHT / 2) {
+            collidedLetterIndex = -1;
+        }
+
+        for (var j = 0; j < lazers.length; j++) {
+            var currentLazer = lazers[j];
+
+            if (currentLazer.x <= currentLetter.x + currentLetter.width / 2 && currentLazer.x >= currentLetter.x - currentLetter.width / 2 && currentLazer.y <= currentLetter.y) {
+                currentLetter.health--;
+                lazers.splice(lazers.indexOf(currentLazer), 1);
+            }
+        }
+    }
+}
+/* End Collision Function */
+
+/* Input Functions */
 function HandleInput() {
     if (keys[0] == true && keys[1] == false && playerX <= WIDTH - 35) {
         playerX += playerSpeed;
@@ -141,6 +202,13 @@ function HandleInput() {
 
     if (keys[1] == true && keys[0] == false && playerX >= 10) {
         playerX -= playerSpeed;
+    }
+
+    if (keys[2]) {
+        if (lazerLoaded) {
+            lazers.push(new __WEBPACK_IMPORTED_MODULE_2__Lazer__["a" /* default */](game, playerX + 13, playerY));
+            lazerLoaded = false;
+        }
     }
 }
 
@@ -177,6 +245,7 @@ function KeysUp(e) {
         keys[2] = false;
     }
 }
+/* End input Functions */
 
 function ClearScreen() {
     game.fillStyle = '#ccc';
@@ -191,11 +260,16 @@ function AnimateGame() {
 
     HandleInput();
 
+    CheckCollision();
+
     DrawLetters();
 
     DrawPlayer();
+
+    DrawLazers();
 }
 
+/* Run Game */
 AnimateGame();
 
 /***/ }),
@@ -221,18 +295,30 @@ var Letter = function () {
 
         this.game = game;
 
-        this.size = 20 + Math.ceil(Math.random() * 8);
-
-        this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
+        this.size = 24 + Math.ceil(Math.random() * 3);
 
         this.width = game.measureText('a').width;
         this.height = this.size * 0.75;
+
+        this.health = Math.ceil(Math.random() * 3);
+
+        this.randomLetter();
     }
 
     _createClass(Letter, [{
         key: "setSpeed",
         value: function setSpeed(speed) {
             this.speed = speed + Math.ceil(Math.random() * 0.3);
+        }
+    }, {
+        key: "isDead",
+        value: function isDead() {
+            console.log(this.letter);
+        }
+    }, {
+        key: "randomLetter",
+        value: function randomLetter() {
+            this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
         }
     }, {
         key: "draw",
@@ -283,6 +369,40 @@ var Player = function () {
 }();
 
 /* harmony default export */ __webpack_exports__["a"] = (Player);
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var lazerSpeed = 16;
+
+var Lazer = function () {
+    function Lazer(game, x, y) {
+        _classCallCheck(this, Lazer);
+
+        this.game = game;
+        this.x = x;
+        this.y = y;
+    }
+
+    _createClass(Lazer, [{
+        key: "draw",
+        value: function draw() {
+            this.game.fillStyle = "red";
+            this.y -= lazerSpeed;
+            this.game.fillRect(this.x, this.y, 2, 18);
+        }
+    }]);
+
+    return Lazer;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Lazer);
 
 /***/ })
 /******/ ]);

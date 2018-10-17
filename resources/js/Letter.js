@@ -6,16 +6,26 @@ export default class Letter{
 
         this.game = game
 
-        this.size = 20+Math.ceil(Math.random() * 8)
+        this.size = 24+Math.ceil(Math.random() * 3)
         
-        this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
-
         this.width = game.measureText('a').width;
         this.height = this.size * 0.75;
+
+        this.health = Math.ceil(Math.random() * 3);
+
+        this.randomLetter()
     }
 
     setSpeed(speed){
         this.speed = speed+Math.ceil(Math.random() * 0.3)
+    }
+
+    isDead(){
+        console.log(this.letter)
+    }
+
+    randomLetter(){
+        this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
     }
 
     draw() {
