@@ -77,6 +77,8 @@ module.exports = __webpack_require__(1);
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Letter__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Player__ = __webpack_require__(6);
+
 
 
 /* Canvas Setup */
@@ -90,10 +92,26 @@ canvas.height = HEIGHT;
 
 var game = canvas.getContext("2d");
 
+document.addEventListener("keydown", KeysDown, true);
+document.addEventListener("keyup", KeysUp, true);
+
+/* Keys Control */
+var keys = [false, false, false];
+
 /* Letters */
 var maxLettersInGame = 24;
 var lettersInGame = [];
-var letterSpeed = 4;
+var letterSpeed = 1;
+
+/*  Player */
+var playerX = WIDTH / 2;
+var playerY = HEIGHT - 30;
+var playerSpeed = 6;
+var player = new __WEBPACK_IMPORTED_MODULE_1__Player__["a" /* default */](game);
+
+function DrawPlayer() {
+    player.draw(playerX, playerY);
+}
 
 function DrawLetters() {
     /* Create new Letters */
@@ -103,17 +121,60 @@ function DrawLetters() {
     }
 
     for (var i = 0; i < lettersInGame.length; i++) {
-        var currentEnemy = lettersInGame[i];
+        var currentLetter = lettersInGame[i];
 
         /* Set letter to top */
-        if (currentEnemy.getY() > HEIGHT + currentEnemy.getHeight()) {
-            currentEnemy.y = 0;
-            currentEnemy.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
-            continue;
+        if (currentLetter.y > HEIGHT + currentLetter.height) {
+            currentLetter.y = 0;
+            currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
         }
 
-        currentEnemy.setSpeed(letterSpeed);
-        currentEnemy.draw();
+        currentLetter.setSpeed(letterSpeed);
+        currentLetter.draw();
+    }
+}
+
+function HandleInput() {
+    if (keys[0] == true && keys[1] == false && playerX <= WIDTH - 35) {
+        playerX += playerSpeed;
+    }
+
+    if (keys[1] == true && keys[0] == false && playerX >= 10) {
+        playerX -= playerSpeed;
+    }
+}
+
+function KeysDown(e) {
+    e.preventDefault();
+
+    // Right
+    if (e.keyCode == 39) {
+        keys[0] = true;
+    }
+    // Left
+    else if (e.keyCode == 37) {
+            keys[1] = true;
+        }
+
+    // Up/Fire
+    if (e.keyCode == 38) {
+        keys[2] = true;
+    }
+}
+
+function KeysUp(e) {
+    // Right
+    if (e.keyCode == 39) {
+        keys[0] = false;
+    }
+    // Left
+    else if (e.keyCode == 37) {
+            keys[1] = false;
+        }
+
+    // Up/Fire
+    if (e.keyCode == 38) {
+        keys[2] = false;
     }
 }
 
@@ -122,16 +183,20 @@ function ClearScreen() {
     game.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-function animateGame() {
+function AnimateGame() {
 
-    requestAnimationFrame(animateGame);
+    requestAnimationFrame(AnimateGame);
 
     ClearScreen();
 
+    HandleInput();
+
     DrawLetters();
+
+    DrawPlayer();
 }
 
-animateGame();
+AnimateGame();
 
 /***/ }),
 /* 2 */,
@@ -156,9 +221,7 @@ var Letter = function () {
 
         this.game = game;
 
-        this.health = Math.ceil(Math.random() * 4);
-
-        this.size = 20;
+        this.size = 20 + Math.ceil(Math.random() * 8);
 
         this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
 
@@ -169,26 +232,14 @@ var Letter = function () {
     _createClass(Letter, [{
         key: "setSpeed",
         value: function setSpeed(speed) {
-            this.speed = speed + Math.ceil(Math.random() * 4);
-        }
-    }, {
-        key: "getY",
-        value: function getY() {
-            return this.y;
-        }
-    }, {
-        key: "getHeight",
-        value: function getHeight() {
-            return this.height;
+            this.speed = speed + Math.ceil(Math.random() * 0.3);
         }
     }, {
         key: "draw",
         value: function draw() {
-            this.game.font = this.size + "px Arial";
+            this.game.font = this.size + "px Nunito";
             this.game.fillStyle = "blue";
-            this.game.shadowColor = "blue";
-            this.game.shadowBlur = 15;
-            this.game.font = this.size + "px Arial";
+            this.game.font = this.size + "px Nunito";
             this.game.textAlign = "center";
 
             this.y += this.speed;
@@ -201,6 +252,37 @@ var Letter = function () {
 }();
 
 /* harmony default export */ __webpack_exports__["a"] = (Letter);
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Player = function () {
+    function Player(game, x, y) {
+        _classCallCheck(this, Player);
+
+        this.game = game;
+
+        this.playerImage = new Image();
+        this.playerImage.src = "/public/img/player.png";
+    }
+
+    _createClass(Player, [{
+        key: "draw",
+        value: function draw(x, y) {
+            this.game.drawImage(this.playerImage, x, y);
+        }
+    }]);
+
+    return Player;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Player);
 
 /***/ })
 /******/ ]);

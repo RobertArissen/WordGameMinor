@@ -1,21 +1,37 @@
 import Letter from './Letter'
-
+import Player from './Player'
 
 /* Canvas Setup */
-const canvas = document.querySelector('canvas');
+const canvas = document.querySelector('canvas')
 
 const WIDTH = 700
 const HEIGHT = 500
 
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
+canvas.width = WIDTH
+canvas.height = HEIGHT
 
-const game = canvas.getContext("2d");
+const game = canvas.getContext("2d")
+
+document.addEventListener("keydown", KeysDown, true);
+document.addEventListener("keyup", KeysUp, true)
+
+/* Keys Control */
+let keys = [false, false, false];
 
 /* Letters */
-let maxLettersInGame = 24;
-let lettersInGame = [];
-let letterSpeed = 4;
+let maxLettersInGame = 24
+let lettersInGame = []
+let letterSpeed = 1
+
+/*  Player */
+let playerX = WIDTH / 2
+let playerY = HEIGHT - 30
+let playerSpeed = 6
+let player = new Player(game)
+
+function DrawPlayer() {
+ player.draw(playerX, playerY)
+}
 
 function DrawLetters(){
     /* Create new Letters */
@@ -24,20 +40,62 @@ function DrawLetters(){
         lettersInGame.push(new Letter(game, randomX));
     }
 
-
     for (var i = 0; i < lettersInGame.length; i++) {
-        let currentEnemy = lettersInGame[i];
+        let currentLetter = lettersInGame[i];
       
         /* Set letter to top */
-        if (currentEnemy.getY() > HEIGHT + currentEnemy.getHeight()) {
-            currentEnemy.y = 0;
-            currentEnemy.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
-            continue;
+        if (currentLetter.y > HEIGHT + currentLetter.height) {
+            currentLetter.y = 0;
+            currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 80));            
         }
         
-        currentEnemy.setSpeed(letterSpeed)
-        currentEnemy.draw();
+        currentLetter.setSpeed(letterSpeed)
+        currentLetter.draw();
     }
+}
+
+function HandleInput() {
+    if (keys[0] == true && keys[1] == false && playerX <= WIDTH - 35) {
+  	    playerX += playerSpeed;
+    }
+  
+    if (keys[1] == true && keys[0] == false && playerX >= 10) {
+  	    playerX -= playerSpeed;
+    }
+}
+
+function KeysDown(e) {
+	e.preventDefault();
+  
+  // Right
+	if (e.keyCode == 39) {
+  	keys[0] = true;
+  }
+  // Left
+  else if (e.keyCode == 37) {
+  	keys[1] = true;
+  }
+  
+  // Up/Fire
+  if (e.keyCode == 38) {
+  	keys[2] = true;
+  }
+}
+
+function KeysUp(e) {
+  // Right
+	if (e.keyCode == 39) {
+  	keys[0] = false;
+  }
+  // Left
+  else if (e.keyCode == 37) {
+  	keys[1] = false;
+  }
+  
+  // Up/Fire
+  if (e.keyCode == 38) {
+  	keys[2] = false;
+  }
 }
 
 function ClearScreen() {
@@ -45,15 +103,19 @@ function ClearScreen() {
     game.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-
-function animateGame(){
+function AnimateGame(){
     
-    requestAnimationFrame(animateGame)
+    requestAnimationFrame(AnimateGame)
 
-    ClearScreen();
+    ClearScreen()
+
+    HandleInput()
 
     DrawLetters()
+
+    DrawPlayer()
+
 }
 
-animateGame();
+AnimateGame();
 
