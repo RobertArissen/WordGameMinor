@@ -8,7 +8,7 @@ export default class Lazer {
     }
 
     draw(){
-        this.game.fillStyle = "red";
+        this.game.fillStyle = "#ffed4a";
         this.y -= lazerSpeed;
         this.game.fillRect(this.x, this.y, 2, 18);
     }

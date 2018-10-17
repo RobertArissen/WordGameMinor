@@ -323,10 +323,11 @@ var Letter = function () {
     }, {
         key: "draw",
         value: function draw() {
-            this.game.font = this.size + "px Nunito";
-            this.game.fillStyle = "blue";
-            this.game.font = this.size + "px Nunito";
+            this.game.fillStyle = "#1c3d5a";
+            this.game.font = "bold " + this.size + "px Nunito";
             this.game.textAlign = "center";
+            this.game.shadowColor = "rgba(0,0,0,0.5)";
+            this.game.shadowBlur = 4;
 
             this.y += this.speed;
 
@@ -393,7 +394,7 @@ var Lazer = function () {
     _createClass(Lazer, [{
         key: "draw",
         value: function draw() {
-            this.game.fillStyle = "red";
+            this.game.fillStyle = "#ffed4a";
             this.y -= lazerSpeed;
             this.game.fillRect(this.x, this.y, 2, 18);
         }

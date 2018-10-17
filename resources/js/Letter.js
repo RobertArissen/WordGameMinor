@@ -29,11 +29,12 @@ export default class Letter{
     }
 
     draw() {
-        this.game.font = this.size+"px Nunito";
-        this.game.fillStyle = "blue";
-        this.game.font = this.size+"px Nunito";
+        this.game.fillStyle = "#1c3d5a";
+        this.game.font = "bold "+this.size+"px Nunito";
         this.game.textAlign = "center";
-        
+        this.game.shadowColor = "rgba(0,0,0,0.5)";
+        this.game.shadowBlur = 4;
+
         this.y += this.speed;
         
         this.game.fillText(this.letter, this.x, this.y);
