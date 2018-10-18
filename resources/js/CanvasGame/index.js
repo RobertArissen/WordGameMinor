@@ -17,6 +17,13 @@ const game = canvas.getContext("2d")
 document.addEventListener("keydown", KeysDown, true);
 document.addEventListener("keyup", KeysUp, true)
 
+/* Game Setup */
+let gameStarted = false
+let showNextWords = false
+let playedOut = false
+let activeWord = false
+let score = 0
+
 /* Keys Control */
 let keys = [false, false, false];
 
@@ -37,6 +44,10 @@ let lazerLoaded = true;
 let lazers = [];
 let lazerReloadDistance = playerY - 120;
 
+/* Health */
+let heartImage = new Image();
+heartImage.src = "/public/img/heart.png"; 
+
 
 /* Draw Functions */
 function DrawPlayer() {
@@ -47,7 +58,7 @@ function DrawLetters(){
     /* Create new Letters */
 	if (Math.random() <= 0.05 && lettersInGame.length < maxLettersInGame) {
         var randomX = 40 + Math.floor(Math.random() * (WIDTH - 80));
-        lettersInGame.push(new Letter(game, randomX));
+        lettersInGame.push(new Letter(game, randomX, activeWord));
     }
 
     for (var i = 0; i < lettersInGame.length; i++) {
@@ -90,6 +101,12 @@ function DrawLazers() {
         else {
             lazers.splice(i, 1);
         }
+    }
+}
+
+function DrawHearts() {
+    for (let index = 0; index < player.health; index++) {
+        game.drawImage(heartImage,10+(index*30),10);
     }
 }
 /* End draw Functions */
@@ -173,8 +190,77 @@ function KeysUp(e) {
 }
 /* End input Functions */
 
+/* EventBus Logic */
+EventBus.$on('wordCorrect', data => {
+    showNextWords = data
+
+    setTimeout(() => {
+        showNextWords = false
+        lettersInGame = []
+        lazers = []
+    }, 2000);
+});
+
+EventBus.$on('playedOut', data => {
+    playedOut = data
+});
+
+EventBus.$on('activeWord', word => {
+    activeWord = word
+});
+
+EventBus.$on('playerHealth', health => {    
+    player.health = health
+});
+
+EventBus.$on('score', data => {    
+    score = data
+});
+
+
+/* Start Screen Functions */
+function startScreen(){
+    canvas.style.cursor = 'pointer'
+
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Start game', canvas.width/2, canvas.height/2);
+}
+
+canvas.addEventListener('click', (e) => {
+    if(!gameStarted){
+        gameStarted = true
+        EventBus.$emit('gameStarted', gameStarted)
+    }
+});
+/* End Screen Functions */
+
+
+function nextWordScreen(){
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Het '+ showNextWords[0] +' woord voor '+ showNextWords[1], canvas.width/2, canvas.height/2);
+}
+
+function playedOutScreen(){
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Je hebt het spel uitgespeeld!', canvas.width/2, canvas.height/2);
+}
+
+function gameOverScreen(){
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Je bent af met een score van: '+ score, canvas.width/2, canvas.height/2);
+}
 
 function ClearScreen() {
+    canvas.style.cursor = 'default'
+
     game.fillStyle = '#ccc';
     game.fillRect(0, 0, canvas.width, canvas.height);
 }
@@ -185,16 +271,30 @@ function AnimateGame(){
 
     ClearScreen()
 
-    HandleInput()
+    if(gameStarted){
 
-    CheckCollision()
+        if(showNextWords){
+            nextWordScreen()
+        }else if(playedOut){
+            playedOutScreen()
+        }else if(player.health === 0){
+            gameOverScreen()
+        }else{
+        HandleInput()
+        
+        CheckCollision()
+    
+        DrawLetters()
+    
+        DrawPlayer()
+    
+        DrawLazers()
 
-    DrawLetters()
-
-    DrawPlayer()
-
-    DrawLazers()
-
+        DrawHearts()
+    }
+    }else{
+        startScreen()
+    }
 }
 
 /* Run Game */

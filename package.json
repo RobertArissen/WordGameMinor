@@ -17,6 +17,7 @@
     "node-sass": "^4.9.4"
   },
   "dependencies": {
-    "phaser-ce": "^2.11.1"
+    "phaser-ce": "^2.11.1",
+    "vue": "^2.5.17"
   }
 }

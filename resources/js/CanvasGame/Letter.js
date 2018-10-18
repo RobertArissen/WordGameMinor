@@ -1,10 +1,12 @@
-const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 export default class Letter{
-    constructor(game, x){
+    constructor(game, x, activeWord){
         this.x = x;
         this.y = 0;
 
         this.game = game
+
+        this.activeWord = activeWord
 
         this.size = 24+Math.ceil(Math.random() * 3)
         
@@ -21,18 +23,20 @@ export default class Letter{
     }
 
     isDead(){
-        console.log(this.letter)
+        EventBus.$emit('hitLetter', this.letter)
     }
 
     randomLetter(){
+        letters += this.activeWord.toUpperCase()
+
         this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
     }
 
     draw() {
-        this.game.fillStyle = "#1c3d5a";
+        this.game.fillStyle = "#2779bd";
         this.game.font = "bold "+this.size+"px Nunito";
         this.game.textAlign = "center";
-        this.game.shadowColor = "rgba(0,0,0,0.5)";
+        this.game.shadowColor = "rgba(0,0,0,0.3)";
         this.game.shadowBlur = 4;
 
         this.y += this.speed;
