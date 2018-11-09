@@ -1,7 +1,7 @@
 /* Import Objects */
 import Letter from './Letter'
 import Player from './Player'
-import Lazer from './Lazer'
+import Laser from './Laser'
 
 /* Canvas Setup */
 const canvas = document.querySelector('canvas')
@@ -21,14 +21,17 @@ document.addEventListener("keyup", KeysUp, true)
 let gameStarted = false
 let showNextWords = false
 let playedOut = false
-let activeWord = false
+let activeWord = ''
 let score = 0
+
+let backgroundImage = new Image();
+backgroundImage.src = "/public/img/space.png"; 
 
 /* Keys Control */
 let keys = [false, false, false];
 
 /* Letters */
-let maxLettersInGame = 24
+let maxLettersInGame = 20
 let lettersInGame = []
 let letterSpeed = 1
 let collidedLetterIndex = -1;
@@ -39,10 +42,10 @@ let playerY = HEIGHT - 30
 let playerSpeed = 4
 let player = new Player(game)
 
-/* Lazers */
-let lazerLoaded = true;
-let lazers = [];
-let lazerReloadDistance = playerY - 120;
+/* lasers */
+let laserLoaded = true;
+let lasers = [];
+let laserReloadDistance = playerY - 120;
 
 /* Health */
 let heartImage = new Image();
@@ -57,7 +60,7 @@ function DrawPlayer() {
 function DrawLetters(){
     /* Create new Letters */
 	if (Math.random() <= 0.05 && lettersInGame.length < maxLettersInGame) {
-        var randomX = 40 + Math.floor(Math.random() * (WIDTH - 80));
+        let randomX = 40 + Math.floor(Math.random() * (WIDTH - 80));
         lettersInGame.push(new Letter(game, randomX, activeWord));
     }
 
@@ -71,7 +74,7 @@ function DrawLetters(){
             /* Set letter to top */
             if (currentLetter.y > HEIGHT + currentLetter.height) {
                 currentLetter.y = 0;
-                currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
+                currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 40));
                 currentLetter.randomLetter()            
             }
             
@@ -81,32 +84,36 @@ function DrawLetters(){
     }
 }
 
-function DrawLazers() {
-	/* Kijk als de vorige lazer is ver genoeg voor een nieuwe lazer */
-	if (lazers.length != 0) {
-        if (lazers[lazers.length - 1].y <= lazerReloadDistance) {
-            lazerLoaded = true;
+function Drawlasers() {
+	/* Kijk als de vorige laser is ver genoeg voor een nieuwe laser */
+	if (lasers.length != 0) {
+        if (lasers[lasers.length - 1].y <= laserReloadDistance) {
+            laserLoaded = true;
         }
 	}else {
-  	    lazerLoaded = true;
+  	    laserLoaded = true;
     }
   
-    for (var i = 0; i < lazers.length; i++) {
-        var currentLazer = lazers[i];
+    for (var i = 0; i < lasers.length; i++) {
+        var currentlaser = lasers[i];
         
         /* Als die nog op het scherm is, teken hem stuk hoger anders verwijderen */
-        if (currentLazer.y > -20) {
-            currentLazer.draw();
+        if (currentlaser.y > -20) {
+            currentlaser.draw();
         }
         else {
-            lazers.splice(i, 1);
+            lasers.splice(i, 1);
         }
     }
 }
 
 function DrawHearts() {
     for (let index = 0; index < player.health; index++) {
+        game.shadowColor = "red";
+        game.shadowBlur = 6;
         game.drawImage(heartImage,10+(index*30),10);
+
+        game.shadowBlur = 0;
     }
 }
 /* End draw Functions */
@@ -120,17 +127,17 @@ function CheckCollision() {
             collidedLetterIndex = -1;
         }
         
-        for (let j = 0; j < lazers.length; j++) {
-            let currentLazer = lazers[j];
+        for (let j = 0; j < lasers.length; j++) {
+            let currentlaser = lasers[j];
         
             if (
-                currentLazer.x <= currentLetter.x + (currentLetter.width / 2) && 
-                currentLazer.x >= currentLetter.x - (currentLetter.width / 2) && 
-                currentLazer.y <= currentLetter.y
+                currentlaser.x <= currentLetter.x + (currentLetter.width / 2) && 
+                currentlaser.x >= currentLetter.x - (currentLetter.width / 2) && 
+                currentlaser.y <= currentLetter.y
                 )
             {
                 currentLetter.health--;
-                lazers.splice(lazers.indexOf(currentLazer), 1);
+                lasers.splice(lasers.indexOf(currentlaser), 1);
             }
         }
     }
@@ -148,9 +155,9 @@ function HandleInput() {
     }
 
     if (keys[2]) {
-        if (lazerLoaded) {
-            lazers.push(new Lazer(game, playerX+13, playerY));
-            lazerLoaded = false;
+        if (laserLoaded) {
+            lasers.push(new Laser(game, playerX+13, playerY));
+            laserLoaded = false;
         }
     }
 }
@@ -168,7 +175,7 @@ function KeysDown(e) {
   }
   
   // Up/Fire
-  if (e.keyCode == 38) {
+  if (e.keyCode == 32) {
   	keys[2] = true;
   }
 }
@@ -184,7 +191,7 @@ function KeysUp(e) {
   }
   
   // Up/Fire
-  if (e.keyCode == 38) {
+  if (e.keyCode == 32) {
   	keys[2] = false;
   }
 }
@@ -197,7 +204,7 @@ EventBus.$on('wordCorrect', data => {
     setTimeout(() => {
         showNextWords = false
         lettersInGame = []
-        lazers = []
+        lasers = []
     }, 2000);
 });
 
@@ -261,8 +268,8 @@ function gameOverScreen(){
 function ClearScreen() {
     canvas.style.cursor = 'default'
 
-    game.fillStyle = '#ccc';
-    game.fillRect(0, 0, canvas.width, canvas.height);
+    game.drawImage(backgroundImage,0,0);   
+
 }
 
 function AnimateGame(){
@@ -288,7 +295,7 @@ function AnimateGame(){
     
         DrawPlayer()
     
-        DrawLazers()
+        Drawlasers()
 
         DrawHearts()
     }

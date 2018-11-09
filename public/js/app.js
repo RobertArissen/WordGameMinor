@@ -60,11 +60,120 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 2);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports) {
+
+/* globals __VUE_SSR_CONTEXT__ */
+
+// IMPORTANT: Do NOT use ES2015 features in this file.
+// This module is a runtime utility for cleaner component module output and will
+// be included in the final webpack user bundle.
+
+module.exports = function normalizeComponent (
+  rawScriptExports,
+  compiledTemplate,
+  functionalTemplate,
+  injectStyles,
+  scopeId,
+  moduleIdentifier /* server only */
+) {
+  var esModule
+  var scriptExports = rawScriptExports = rawScriptExports || {}
+
+  // ES6 modules interop
+  var type = typeof rawScriptExports.default
+  if (type === 'object' || type === 'function') {
+    esModule = rawScriptExports
+    scriptExports = rawScriptExports.default
+  }
+
+  // Vue.extend constructor export interop
+  var options = typeof scriptExports === 'function'
+    ? scriptExports.options
+    : scriptExports
+
+  // render functions
+  if (compiledTemplate) {
+    options.render = compiledTemplate.render
+    options.staticRenderFns = compiledTemplate.staticRenderFns
+    options._compiled = true
+  }
+
+  // functional template
+  if (functionalTemplate) {
+    options.functional = true
+  }
+
+  // scopedId
+  if (scopeId) {
+    options._scopeId = scopeId
+  }
+
+  var hook
+  if (moduleIdentifier) { // server build
+    hook = function (context) {
+      // 2.3 injection
+      context =
+        context || // cached call
+        (this.$vnode && this.$vnode.ssrContext) || // stateful
+        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
+      // 2.2 with runInNewContext: true
+      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
+        context = __VUE_SSR_CONTEXT__
+      }
+      // inject component styles
+      if (injectStyles) {
+        injectStyles.call(this, context)
+      }
+      // register component module identifier for async chunk inferrence
+      if (context && context._registeredComponents) {
+        context._registeredComponents.add(moduleIdentifier)
+      }
+    }
+    // used by ssr in case component is cached and beforeCreate
+    // never gets called
+    options._ssrRegister = hook
+  } else if (injectStyles) {
+    hook = injectStyles
+  }
+
+  if (hook) {
+    var functional = options.functional
+    var existing = functional
+      ? options.render
+      : options.beforeCreate
+
+    if (!functional) {
+      // inject component registration as beforeCreate hook
+      options.beforeCreate = existing
+        ? [].concat(existing, hook)
+        : [hook]
+    } else {
+      // for template-only hot-reload because in that case the render fn doesn't
+      // go through the normalizer
+      options._injectStyles = hook
+      // register for functioal component in vue file
+      options.render = function renderWithStyleInjection (h, context) {
+        hook.call(context)
+        return existing(h, context)
+      }
+    }
+  }
+
+  return {
+    esModule: esModule,
+    exports: scriptExports,
+    options: options
+  }
+}
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports) {
 
 var g;
@@ -91,36 +200,36 @@ module.exports = g;
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(2);
-
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-window.Vue = __webpack_require__(3);
-window.gameWords = __webpack_require__(19).words;
+module.exports = __webpack_require__(3);
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+window.Vue = __webpack_require__(4);
+window.gameWords = __webpack_require__(8).words;
 
 /* Vue */
 window.EventBus = new Vue();
 
-Vue.component('GameControl', __webpack_require__(24));
-Vue.component('Words', __webpack_require__(20));
-Vue.component('Question', __webpack_require__(27));
-Vue.component('Score', __webpack_require__(30));
+Vue.component('GameControl', __webpack_require__(9));
+Vue.component('Words', __webpack_require__(12));
+Vue.component('Question', __webpack_require__(15));
+Vue.component('Score', __webpack_require__(18));
 
 var app = new Vue({
     el: '#app'
 });
 
 /* Game */
-__webpack_require__(11);
+__webpack_require__(21);
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11083,10 +11192,10 @@ Vue.compile = compileToFunctions;
 
 module.exports = Vue;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(4).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(5).setImmediate))
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
@@ -11142,7 +11251,7 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(5);
+__webpack_require__(6);
 // On some exotic environments, it's not clear which object `setimmediate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
@@ -11153,10 +11262,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1)))
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -11346,10 +11455,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(6)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(1), __webpack_require__(7)))
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -11539,560 +11648,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 7 */,
-/* 8 */,
-/* 9 */,
-/* 10 */,
-/* 11 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Letter__ = __webpack_require__(12);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Player__ = __webpack_require__(13);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Lazer__ = __webpack_require__(14);
-/* Import Objects */
-
-
-
-
-/* Canvas Setup */
-var canvas = document.querySelector('canvas');
-
-var WIDTH = 700;
-var HEIGHT = 500;
-
-canvas.width = WIDTH;
-canvas.height = HEIGHT;
-
-var game = canvas.getContext("2d");
-
-document.addEventListener("keydown", KeysDown, true);
-document.addEventListener("keyup", KeysUp, true);
-
-/* Game Setup */
-var gameStarted = false;
-var showNextWords = false;
-var playedOut = false;
-var activeWord = false;
-var score = 0;
-
-/* Keys Control */
-var keys = [false, false, false];
-
-/* Letters */
-var maxLettersInGame = 24;
-var lettersInGame = [];
-var letterSpeed = 1;
-var collidedLetterIndex = -1;
-
-/*  Player */
-var playerX = WIDTH / 2;
-var playerY = HEIGHT - 30;
-var playerSpeed = 4;
-var player = new __WEBPACK_IMPORTED_MODULE_1__Player__["a" /* default */](game);
-
-/* Lazers */
-var lazerLoaded = true;
-var lazers = [];
-var lazerReloadDistance = playerY - 120;
-
-/* Health */
-var heartImage = new Image();
-heartImage.src = "/public/img/heart.png";
-
-/* Draw Functions */
-function DrawPlayer() {
-    player.draw(playerX, playerY);
-}
-
-function DrawLetters() {
-    /* Create new Letters */
-    if (Math.random() <= 0.05 && lettersInGame.length < maxLettersInGame) {
-        var randomX = 40 + Math.floor(Math.random() * (WIDTH - 80));
-        lettersInGame.push(new __WEBPACK_IMPORTED_MODULE_0__Letter__["a" /* default */](game, randomX, activeWord));
-    }
-
-    for (var i = 0; i < lettersInGame.length; i++) {
-        var currentLetter = lettersInGame[i];
-
-        if (currentLetter.health <= 0) {
-            lettersInGame.splice(i, 1);
-            currentLetter.isDead();
-        } else {
-            /* Set letter to top */
-            if (currentLetter.y > HEIGHT + currentLetter.height) {
-                currentLetter.y = 0;
-                currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 80));
-                currentLetter.randomLetter();
-            }
-
-            currentLetter.setSpeed(letterSpeed);
-            currentLetter.draw();
-        }
-    }
-}
-
-function DrawLazers() {
-    /* Kijk als de vorige lazer is ver genoeg voor een nieuwe lazer */
-    if (lazers.length != 0) {
-        if (lazers[lazers.length - 1].y <= lazerReloadDistance) {
-            lazerLoaded = true;
-        }
-    } else {
-        lazerLoaded = true;
-    }
-
-    for (var i = 0; i < lazers.length; i++) {
-        var currentLazer = lazers[i];
-
-        /* Als die nog op het scherm is, teken hem stuk hoger anders verwijderen */
-        if (currentLazer.y > -20) {
-            currentLazer.draw();
-        } else {
-            lazers.splice(i, 1);
-        }
-    }
-}
-
-function DrawHearts() {
-    for (var index = 0; index < player.health; index++) {
-        game.drawImage(heartImage, 10 + index * 30, 10);
-    }
-}
-/* End draw Functions */
-
-/* Collision Function */
-function CheckCollision() {
-    for (var i = 0; i < lettersInGame.length; i++) {
-        var currentLetter = lettersInGame[i];
-
-        if (collidedLetterIndex == lettersInGame.indexOf(currentLetter) && currentEnemy.y < HEIGHT / 2) {
-            collidedLetterIndex = -1;
-        }
-
-        for (var j = 0; j < lazers.length; j++) {
-            var currentLazer = lazers[j];
-
-            if (currentLazer.x <= currentLetter.x + currentLetter.width / 2 && currentLazer.x >= currentLetter.x - currentLetter.width / 2 && currentLazer.y <= currentLetter.y) {
-                currentLetter.health--;
-                lazers.splice(lazers.indexOf(currentLazer), 1);
-            }
-        }
-    }
-}
-/* End Collision Function */
-
-/* Input Functions */
-function HandleInput() {
-    if (keys[0] == true && keys[1] == false && playerX <= WIDTH - 35) {
-        playerX += playerSpeed;
-    }
-
-    if (keys[1] == true && keys[0] == false && playerX >= 10) {
-        playerX -= playerSpeed;
-    }
-
-    if (keys[2]) {
-        if (lazerLoaded) {
-            lazers.push(new __WEBPACK_IMPORTED_MODULE_2__Lazer__["a" /* default */](game, playerX + 13, playerY));
-            lazerLoaded = false;
-        }
-    }
-}
-
-function KeysDown(e) {
-    e.preventDefault();
-
-    // Right
-    if (e.keyCode == 39) {
-        keys[0] = true;
-    }
-    // Left
-    else if (e.keyCode == 37) {
-            keys[1] = true;
-        }
-
-    // Up/Fire
-    if (e.keyCode == 38) {
-        keys[2] = true;
-    }
-}
-
-function KeysUp(e) {
-    // Right
-    if (e.keyCode == 39) {
-        keys[0] = false;
-    }
-    // Left
-    else if (e.keyCode == 37) {
-            keys[1] = false;
-        }
-
-    // Up/Fire
-    if (e.keyCode == 38) {
-        keys[2] = false;
-    }
-}
-/* End input Functions */
-
-/* EventBus Logic */
-EventBus.$on('wordCorrect', function (data) {
-    showNextWords = data;
-
-    setTimeout(function () {
-        showNextWords = false;
-        lettersInGame = [];
-        lazers = [];
-    }, 2000);
-});
-
-EventBus.$on('playedOut', function (data) {
-    playedOut = data;
-});
-
-EventBus.$on('activeWord', function (word) {
-    activeWord = word;
-});
-
-EventBus.$on('playerHealth', function (health) {
-    player.health = health;
-});
-
-EventBus.$on('score', function (data) {
-    score = data;
-});
-
-/* Start Screen Functions */
-function startScreen() {
-    canvas.style.cursor = 'pointer';
-
-    game.font = '24pt Nunito';
-    game.textAlign = 'center';
-    game.fillStyle = '#3490dc';
-    game.fillText('Start game', canvas.width / 2, canvas.height / 2);
-}
-
-canvas.addEventListener('click', function (e) {
-    if (!gameStarted) {
-        gameStarted = true;
-        EventBus.$emit('gameStarted', gameStarted);
-    }
-});
-/* End Screen Functions */
-
-function nextWordScreen() {
-    game.font = '24pt Nunito';
-    game.textAlign = 'center';
-    game.fillStyle = '#3490dc';
-    game.fillText('Het ' + showNextWords[0] + ' woord voor ' + showNextWords[1], canvas.width / 2, canvas.height / 2);
-}
-
-function playedOutScreen() {
-    game.font = '24pt Nunito';
-    game.textAlign = 'center';
-    game.fillStyle = '#3490dc';
-    game.fillText('Je hebt het spel uitgespeeld!', canvas.width / 2, canvas.height / 2);
-}
-
-function gameOverScreen() {
-    game.font = '24pt Nunito';
-    game.textAlign = 'center';
-    game.fillStyle = '#3490dc';
-    game.fillText('Je bent af met een score van: ' + score, canvas.width / 2, canvas.height / 2);
-}
-
-function ClearScreen() {
-    canvas.style.cursor = 'default';
-
-    game.fillStyle = '#ccc';
-    game.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function AnimateGame() {
-
-    requestAnimationFrame(AnimateGame);
-
-    ClearScreen();
-
-    if (gameStarted) {
-
-        if (showNextWords) {
-            nextWordScreen();
-        } else if (playedOut) {
-            playedOutScreen();
-        } else if (player.health === 0) {
-            gameOverScreen();
-        } else {
-            HandleInput();
-
-            CheckCollision();
-
-            DrawLetters();
-
-            DrawPlayer();
-
-            DrawLazers();
-
-            DrawHearts();
-        }
-    } else {
-        startScreen();
-    }
-}
-
-/* Run Game */
-AnimateGame();
-
-/***/ }),
-/* 12 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-var Letter = function () {
-    function Letter(game, x, activeWord) {
-        _classCallCheck(this, Letter);
-
-        this.x = x;
-        this.y = 0;
-
-        this.game = game;
-
-        this.activeWord = activeWord;
-
-        this.size = 24 + Math.ceil(Math.random() * 3);
-
-        this.width = game.measureText('a').width;
-        this.height = this.size * 0.75;
-
-        this.health = Math.ceil(Math.random() * 3);
-
-        this.randomLetter();
-    }
-
-    _createClass(Letter, [{
-        key: 'setSpeed',
-        value: function setSpeed(speed) {
-            this.speed = speed + Math.ceil(Math.random() * 0.3);
-        }
-    }, {
-        key: 'isDead',
-        value: function isDead() {
-            EventBus.$emit('hitLetter', this.letter);
-        }
-    }, {
-        key: 'randomLetter',
-        value: function randomLetter() {
-            letters += this.activeWord.toUpperCase();
-
-            this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
-        }
-    }, {
-        key: 'draw',
-        value: function draw() {
-            this.game.fillStyle = "#2779bd";
-            this.game.font = "bold " + this.size + "px Nunito";
-            this.game.textAlign = "center";
-            this.game.shadowColor = "rgba(0,0,0,0.3)";
-            this.game.shadowBlur = 4;
-
-            this.y += this.speed;
-
-            this.game.fillText(this.letter, this.x, this.y);
-        }
-    }]);
-
-    return Letter;
-}();
-
-/* harmony default export */ __webpack_exports__["a"] = (Letter);
-
-/***/ }),
-/* 13 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Player = function () {
-    function Player(game, x, y) {
-        _classCallCheck(this, Player);
-
-        this.game = game;
-
-        this.health = 3;
-        this.playerImage = new Image();
-        this.playerImage.src = "/public/img/player.png";
-    }
-
-    _createClass(Player, [{
-        key: "draw",
-        value: function draw(x, y) {
-            this.game.drawImage(this.playerImage, x, y);
-        }
-    }]);
-
-    return Player;
-}();
-
-/* harmony default export */ __webpack_exports__["a"] = (Player);
-
-/***/ }),
-/* 14 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var lazerSpeed = 16;
-
-var Lazer = function () {
-    function Lazer(game, x, y) {
-        _classCallCheck(this, Lazer);
-
-        this.game = game;
-        this.x = x;
-        this.y = y;
-    }
-
-    _createClass(Lazer, [{
-        key: "draw",
-        value: function draw() {
-            this.game.fillStyle = "#ffed4a";
-            this.y -= lazerSpeed;
-            this.game.fillRect(this.x, this.y, 2, 18);
-        }
-    }]);
-
-    return Lazer;
-}();
-
-/* harmony default export */ __webpack_exports__["a"] = (Lazer);
-
-/***/ }),
-/* 15 */,
-/* 16 */
-/***/ (function(module, exports) {
-
-/* globals __VUE_SSR_CONTEXT__ */
-
-// IMPORTANT: Do NOT use ES2015 features in this file.
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-module.exports = function normalizeComponent (
-  rawScriptExports,
-  compiledTemplate,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier /* server only */
-) {
-  var esModule
-  var scriptExports = rawScriptExports = rawScriptExports || {}
-
-  // ES6 modules interop
-  var type = typeof rawScriptExports.default
-  if (type === 'object' || type === 'function') {
-    esModule = rawScriptExports
-    scriptExports = rawScriptExports.default
-  }
-
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (compiledTemplate) {
-    options.render = compiledTemplate.render
-    options.staticRenderFns = compiledTemplate.staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = injectStyles
-  }
-
-  if (hook) {
-    var functional = options.functional
-    var existing = functional
-      ? options.render
-      : options.beforeCreate
-
-    if (!functional) {
-      // inject component registration as beforeCreate hook
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    } else {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functioal component in vue file
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return existing(h, context)
-      }
-    }
-  }
-
-  return {
-    esModule: esModule,
-    exports: scriptExports,
-    options: options
-  }
-}
-
-
-/***/ }),
-/* 17 */,
-/* 18 */,
-/* 19 */
+/* 8 */
 /***/ (function(module, exports) {
 
 var words = [{
@@ -12110,113 +11666,15 @@ var words = [{
 exports.words = words;
 
 /***/ }),
-/* 20 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(16)
+var normalizeComponent = __webpack_require__(0)
 /* script */
-var __vue_script__ = __webpack_require__(21)
+var __vue_script__ = __webpack_require__(10)
 /* template */
-var __vue_template__ = __webpack_require__(22)
-/* template functional */
-var __vue_template_functional__ = false
-/* styles */
-var __vue_styles__ = null
-/* scopeId */
-var __vue_scopeId__ = null
-/* moduleIdentifier (server only) */
-var __vue_module_identifier__ = null
-var Component = normalizeComponent(
-  __vue_script__,
-  __vue_template__,
-  __vue_template_functional__,
-  __vue_styles__,
-  __vue_scopeId__,
-  __vue_module_identifier__
-)
-Component.options.__file = "resources/js/components/Words.vue"
-
-/* hot reload */
-if (false) {(function () {
-  var hotAPI = require("vue-hot-reload-api")
-  hotAPI.install(require("vue"), false)
-  if (!hotAPI.compatible) return
-  module.hot.accept()
-  if (!module.hot.data) {
-    hotAPI.createRecord("data-v-087016ce", Component.options)
-  } else {
-    hotAPI.reload("data-v-087016ce", Component.options)
-  }
-  module.hot.dispose(function (data) {
-    disposed = true
-  })
-})()}
-
-module.exports = Component.exports
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['words', 'wordIndex', 'playedOut']
-});
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "bg-white shadow p-4 rounded" }, [
-    _c("b", { staticClass: "text-sm" }, [_vm._v("Aantal woorden goed")]),
-    _vm._v(" "),
-    !_vm.playedOut
-      ? _c("h3", { staticClass: "text-blue mt-4" }, [
-          _vm._v(_vm._s(_vm.wordIndex) + "/" + _vm._s(_vm.words.length))
-        ])
-      : _c("h3", { staticClass: "text-blue mt-4" }, [
-          _vm._v(_vm._s(_vm.words.length) + "/" + _vm._s(_vm.words.length))
-        ])
-  ])
-}
-var staticRenderFns = []
-render._withStripped = true
-module.exports = { render: render, staticRenderFns: staticRenderFns }
-if (false) {
-  module.hot.accept()
-  if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-087016ce", module.exports)
-  }
-}
-
-/***/ }),
-/* 23 */,
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var disposed = false
-var normalizeComponent = __webpack_require__(16)
-/* script */
-var __vue_script__ = __webpack_require__(25)
-/* template */
-var __vue_template__ = __webpack_require__(26)
+var __vue_template__ = __webpack_require__(11)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -12255,7 +11713,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 25 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12324,7 +11782,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                             _this2.activeLetter = 0;
                             _this2.correctLetters = 0;
 
-                            EventBus.$emit('wordCorrect', [_this2.words[_this2.wordIndex].languageName, _this2.words[_this2.wordIndex].word]);
+                            _this2.emitActiveWord();
+                            EventBus.$emit('wordCorrect', [_this2.words[_this2.wordIndex].languageName, _this2.words[_this2.wordIndex].wordDutch]);
                         } else {
                             _this2.playedOut = true;
                             EventBus.$emit('playedOut', _this2.playedOut);
@@ -12340,7 +11799,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 26 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -12364,7 +11823,7 @@ var render = function() {
         "div",
         {
           staticClass:
-            "p-4 bg-blue-darker mt-2 shadow-inner rounded-b flex items-center px-2 justify-between"
+            "p-4 bg-black shadow-inner rounded-b flex items-center px-2 justify-between"
         },
         [
           _c("question", {
@@ -12402,15 +11861,112 @@ if (false) {
 }
 
 /***/ }),
-/* 27 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(16)
+var normalizeComponent = __webpack_require__(0)
 /* script */
-var __vue_script__ = __webpack_require__(28)
+var __vue_script__ = __webpack_require__(13)
 /* template */
-var __vue_template__ = __webpack_require__(29)
+var __vue_template__ = __webpack_require__(14)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/js/components/Words.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-087016ce", Component.options)
+  } else {
+    hotAPI.reload("data-v-087016ce", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['words', 'wordIndex', 'playedOut']
+});
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "bg-white shadow p-4 rounded" }, [
+    _c("b", { staticClass: "text-sm" }, [_vm._v("Aantal woorden goed")]),
+    _vm._v(" "),
+    !_vm.playedOut
+      ? _c("h3", { staticClass: "text-blue mt-4" }, [
+          _vm._v(_vm._s(_vm.wordIndex) + "/" + _vm._s(_vm.words.length))
+        ])
+      : _c("h3", { staticClass: "text-blue mt-4" }, [
+          _vm._v(_vm._s(_vm.words.length) + "/" + _vm._s(_vm.words.length))
+        ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-087016ce", module.exports)
+  }
+}
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(0)
+/* script */
+var __vue_script__ = __webpack_require__(16)
+/* template */
+var __vue_template__ = __webpack_require__(17)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -12449,7 +12005,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 28 */
+/* 16 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12485,12 +12041,15 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     watch: {
         'words': function words() {
             this.countLetters();
+        },
+        'wordIndex': function wordIndex() {
+            this.countLetters();
         }
     }
 });
 
 /***/ }),
-/* 29 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -12547,15 +12106,15 @@ if (false) {
 }
 
 /***/ }),
-/* 30 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(16)
+var normalizeComponent = __webpack_require__(0)
 /* script */
-var __vue_script__ = __webpack_require__(31)
+var __vue_script__ = __webpack_require__(19)
 /* template */
-var __vue_template__ = __webpack_require__(32)
+var __vue_template__ = __webpack_require__(20)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -12594,7 +12153,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 31 */
+/* 19 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12613,7 +12172,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 32 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -12635,6 +12194,455 @@ if (false) {
     require("vue-hot-reload-api")      .rerender("data-v-513c1e37", module.exports)
   }
 }
+
+/***/ }),
+/* 21 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Letter__ = __webpack_require__(22);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Player__ = __webpack_require__(23);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Laser__ = __webpack_require__(24);
+/* Import Objects */
+
+
+
+
+/* Canvas Setup */
+var canvas = document.querySelector('canvas');
+
+var WIDTH = 700;
+var HEIGHT = 500;
+
+canvas.width = WIDTH;
+canvas.height = HEIGHT;
+
+var game = canvas.getContext("2d");
+
+document.addEventListener("keydown", KeysDown, true);
+document.addEventListener("keyup", KeysUp, true);
+
+/* Game Setup */
+var gameStarted = false;
+var showNextWords = false;
+var playedOut = false;
+var activeWord = '';
+var score = 0;
+
+var backgroundImage = new Image();
+backgroundImage.src = "/public/img/space.png";
+
+/* Keys Control */
+var keys = [false, false, false];
+
+/* Letters */
+var maxLettersInGame = 20;
+var lettersInGame = [];
+var letterSpeed = 1;
+var collidedLetterIndex = -1;
+
+/*  Player */
+var playerX = WIDTH / 2;
+var playerY = HEIGHT - 30;
+var playerSpeed = 4;
+var player = new __WEBPACK_IMPORTED_MODULE_1__Player__["a" /* default */](game);
+
+/* lasers */
+var laserLoaded = true;
+var lasers = [];
+var laserReloadDistance = playerY - 120;
+
+/* Health */
+var heartImage = new Image();
+heartImage.src = "/public/img/heart.png";
+
+/* Draw Functions */
+function DrawPlayer() {
+    player.draw(playerX, playerY);
+}
+
+function DrawLetters() {
+    /* Create new Letters */
+    if (Math.random() <= 0.05 && lettersInGame.length < maxLettersInGame) {
+        var randomX = 40 + Math.floor(Math.random() * (WIDTH - 80));
+        lettersInGame.push(new __WEBPACK_IMPORTED_MODULE_0__Letter__["a" /* default */](game, randomX, activeWord));
+    }
+
+    for (var i = 0; i < lettersInGame.length; i++) {
+        var currentLetter = lettersInGame[i];
+
+        if (currentLetter.health <= 0) {
+            lettersInGame.splice(i, 1);
+            currentLetter.isDead();
+        } else {
+            /* Set letter to top */
+            if (currentLetter.y > HEIGHT + currentLetter.height) {
+                currentLetter.y = 0;
+                currentLetter.x = 40 + Math.floor(Math.random() * (WIDTH - 40));
+                currentLetter.randomLetter();
+            }
+
+            currentLetter.setSpeed(letterSpeed);
+            currentLetter.draw();
+        }
+    }
+}
+
+function Drawlasers() {
+    /* Kijk als de vorige laser is ver genoeg voor een nieuwe laser */
+    if (lasers.length != 0) {
+        if (lasers[lasers.length - 1].y <= laserReloadDistance) {
+            laserLoaded = true;
+        }
+    } else {
+        laserLoaded = true;
+    }
+
+    for (var i = 0; i < lasers.length; i++) {
+        var currentlaser = lasers[i];
+
+        /* Als die nog op het scherm is, teken hem stuk hoger anders verwijderen */
+        if (currentlaser.y > -20) {
+            currentlaser.draw();
+        } else {
+            lasers.splice(i, 1);
+        }
+    }
+}
+
+function DrawHearts() {
+    for (var index = 0; index < player.health; index++) {
+        game.shadowColor = "red";
+        game.shadowBlur = 6;
+        game.drawImage(heartImage, 10 + index * 30, 10);
+
+        game.shadowBlur = 0;
+    }
+}
+/* End draw Functions */
+
+/* Collision Function */
+function CheckCollision() {
+    for (var i = 0; i < lettersInGame.length; i++) {
+        var currentLetter = lettersInGame[i];
+
+        if (collidedLetterIndex == lettersInGame.indexOf(currentLetter) && currentEnemy.y < HEIGHT / 2) {
+            collidedLetterIndex = -1;
+        }
+
+        for (var j = 0; j < lasers.length; j++) {
+            var currentlaser = lasers[j];
+
+            if (currentlaser.x <= currentLetter.x + currentLetter.width / 2 && currentlaser.x >= currentLetter.x - currentLetter.width / 2 && currentlaser.y <= currentLetter.y) {
+                currentLetter.health--;
+                lasers.splice(lasers.indexOf(currentlaser), 1);
+            }
+        }
+    }
+}
+/* End Collision Function */
+
+/* Input Functions */
+function HandleInput() {
+    if (keys[0] == true && keys[1] == false && playerX <= WIDTH - 35) {
+        playerX += playerSpeed;
+    }
+
+    if (keys[1] == true && keys[0] == false && playerX >= 10) {
+        playerX -= playerSpeed;
+    }
+
+    if (keys[2]) {
+        if (laserLoaded) {
+            lasers.push(new __WEBPACK_IMPORTED_MODULE_2__Laser__["a" /* default */](game, playerX + 13, playerY));
+            laserLoaded = false;
+        }
+    }
+}
+
+function KeysDown(e) {
+    e.preventDefault();
+
+    // Right
+    if (e.keyCode == 39) {
+        keys[0] = true;
+    }
+    // Left
+    else if (e.keyCode == 37) {
+            keys[1] = true;
+        }
+
+    // Up/Fire
+    if (e.keyCode == 32) {
+        keys[2] = true;
+    }
+}
+
+function KeysUp(e) {
+    // Right
+    if (e.keyCode == 39) {
+        keys[0] = false;
+    }
+    // Left
+    else if (e.keyCode == 37) {
+            keys[1] = false;
+        }
+
+    // Up/Fire
+    if (e.keyCode == 32) {
+        keys[2] = false;
+    }
+}
+/* End input Functions */
+
+/* EventBus Logic */
+EventBus.$on('wordCorrect', function (data) {
+    showNextWords = data;
+
+    setTimeout(function () {
+        showNextWords = false;
+        lettersInGame = [];
+        lasers = [];
+    }, 2000);
+});
+
+EventBus.$on('playedOut', function (data) {
+    playedOut = data;
+});
+
+EventBus.$on('activeWord', function (word) {
+    activeWord = word;
+});
+
+EventBus.$on('playerHealth', function (health) {
+    player.health = health;
+});
+
+EventBus.$on('score', function (data) {
+    score = data;
+});
+
+/* Start Screen Functions */
+function startScreen() {
+    canvas.style.cursor = 'pointer';
+
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Start game', canvas.width / 2, canvas.height / 2);
+}
+
+canvas.addEventListener('click', function (e) {
+    if (!gameStarted) {
+        gameStarted = true;
+        EventBus.$emit('gameStarted', gameStarted);
+    }
+});
+/* End Screen Functions */
+
+function nextWordScreen() {
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Het ' + showNextWords[0] + ' woord voor ' + showNextWords[1], canvas.width / 2, canvas.height / 2);
+}
+
+function playedOutScreen() {
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Je hebt het spel uitgespeeld!', canvas.width / 2, canvas.height / 2);
+}
+
+function gameOverScreen() {
+    game.font = '24pt Nunito';
+    game.textAlign = 'center';
+    game.fillStyle = '#3490dc';
+    game.fillText('Je bent af met een score van: ' + score, canvas.width / 2, canvas.height / 2);
+}
+
+function ClearScreen() {
+    canvas.style.cursor = 'default';
+
+    game.drawImage(backgroundImage, 0, 0);
+}
+
+function AnimateGame() {
+
+    requestAnimationFrame(AnimateGame);
+
+    ClearScreen();
+
+    if (gameStarted) {
+
+        if (showNextWords) {
+            nextWordScreen();
+        } else if (playedOut) {
+            playedOutScreen();
+        } else if (player.health === 0) {
+            gameOverScreen();
+        } else {
+            HandleInput();
+
+            CheckCollision();
+
+            DrawLetters();
+
+            DrawPlayer();
+
+            Drawlasers();
+
+            DrawHearts();
+        }
+    } else {
+        startScreen();
+    }
+}
+
+/* Run Game */
+AnimateGame();
+
+/***/ }),
+/* 22 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Letter = function () {
+    function Letter(game, x, activeWord) {
+        _classCallCheck(this, Letter);
+
+        this.x = x;
+        this.y = 0;
+
+        this.game = game;
+
+        this.activeWord = activeWord;
+
+        this.size = 24 + Math.ceil(Math.random() * 3);
+
+        this.width = game.measureText('a').width;
+        this.height = this.size * 0.75;
+
+        this.health = Math.ceil(Math.random() * 3);
+
+        this.randomLetter();
+    }
+
+    _createClass(Letter, [{
+        key: 'setSpeed',
+        value: function setSpeed(speed) {
+            this.speed = speed + Math.ceil(Math.random() * 0.3);
+        }
+    }, {
+        key: 'isDead',
+        value: function isDead() {
+            EventBus.$emit('hitLetter', this.letter);
+        }
+    }, {
+        key: 'randomLetter',
+        value: function randomLetter() {
+            var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            letters += this.activeWord.toUpperCase();
+
+            this.letter = letters.substr(Math.floor(Math.random() * letters.length), 1);
+        }
+    }, {
+        key: 'draw',
+        value: function draw() {
+            this.game.fillStyle = "#2779bd";
+            this.game.font = "bold " + this.size + "px Nunito";
+            this.game.textAlign = "center";
+            this.game.shadowColor = "#2779bd";
+            this.game.shadowBlur = 4;
+
+            this.y += this.speed;
+
+            this.game.fillText(this.letter, this.x, this.y);
+
+            this.game.shadowBlur = 0;
+        }
+    }]);
+
+    return Letter;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Letter);
+
+/***/ }),
+/* 23 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Player = function () {
+    function Player(game, x, y) {
+        _classCallCheck(this, Player);
+
+        this.game = game;
+
+        this.health = 3;
+        this.playerImage = new Image();
+        this.playerImage.src = "/public/img/player.png";
+    }
+
+    _createClass(Player, [{
+        key: "draw",
+        value: function draw(x, y) {
+            this.game.drawImage(this.playerImage, x, y);
+        }
+    }]);
+
+    return Player;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Player);
+
+/***/ }),
+/* 24 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var lazerSpeed = 16;
+
+var Laser = function () {
+    function Laser(game, x, y) {
+        _classCallCheck(this, Laser);
+
+        this.game = game;
+        this.x = x;
+        this.y = y;
+    }
+
+    _createClass(Laser, [{
+        key: "draw",
+        value: function draw() {
+            this.game.fillStyle = "#ffed4a";
+            this.game.shadowColor = "#ffed4a";
+            this.game.shadowBlur = 6;
+
+            this.y -= lazerSpeed;
+            this.game.fillRect(this.x, this.y, 3, 18);
+
+            this.game.shadowBlur = 0;
+        }
+    }]);
+
+    return Laser;
+}();
+
+/* harmony default export */ __webpack_exports__["a"] = (Laser);
 
 /***/ })
 /******/ ]);

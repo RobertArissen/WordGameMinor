@@ -1,6 +1,6 @@
 <template>
     <div v-show="gameStarted">
-        <div class="p-4 bg-blue-darker mt-2 shadow-inner rounded-b flex items-center px-2 justify-between">
+        <div class="p-4 bg-black shadow-inner rounded-b flex items-center px-2 justify-between">
             <question :words="words" :wordIndex="wordIndex" :correctLetters="correctLetters" :activeLetter="activeLetter"/>
             <words :words="words" :wordIndex="wordIndex" :playedOut="playedOut"/>
             <score :score="score"/>
@@ -61,7 +61,8 @@
                                 this.activeLetter = 0
                                 this.correctLetters = 0
 
-                                EventBus.$emit('wordCorrect', [this.words[this.wordIndex].languageName, this.words[this.wordIndex].word])
+                                this.emitActiveWord()
+                                EventBus.$emit('wordCorrect', [this.words[this.wordIndex].languageName, this.words[this.wordIndex].wordDutch])
                             }else{
                                 this.playedOut = true
                                 EventBus.$emit('playedOut', this.playedOut)

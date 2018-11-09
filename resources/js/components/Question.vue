@@ -28,6 +28,10 @@
         watch:{
             'words'(){
                 this.countLetters()
+            },
+
+            'wordIndex'(){
+                this.countLetters()
             }
         }
     }
