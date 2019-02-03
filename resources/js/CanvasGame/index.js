@@ -23,9 +23,10 @@ let showNextWords = false
 let playedOut = false
 let activeWord = ''
 let score = 0
+let restartGameTime = false
 
 let backgroundImage = new Image();
-backgroundImage.src = "/public/img/space.png"; 
+backgroundImage.src = "https://cubi.newpenguins.nl/public/img/space.png"; 
 
 /* Keys Control */
 let keys = [false, false, false];
@@ -49,7 +50,7 @@ let laserReloadDistance = playerY - 120;
 
 /* Health */
 let heartImage = new Image();
-heartImage.src = "/public/img/heart.png"; 
+heartImage.src = "https://cubi.newpenguins.nl/public/img/heart.png"; 
 
 
 /* Draw Functions */
@@ -277,10 +278,44 @@ function ClearScreen() {
 
 }
 
-function resetGame(){
-    setTimeout(() => {
-        location.reload();
-    }, 2000);
+function resetGame(){    
+    if(restartGameTime){
+        let nowDate   = new Date();
+        let seconds = (nowDate.getTime() - restartGameTime.getTime()) / 1000;
+
+        if(seconds > 2){
+            EventBus.$emit('restartGame', gameStarted)
+
+            /* Game Setup */
+            gameStarted = false
+            showNextWords = false
+            playedOut = false
+            activeWord = ''
+            score = 0
+            restartGameTime = false
+    
+            /* Keys Control */
+            keys = [false, false, false];
+    
+            /* Letters */
+            maxLettersInGame = 20
+            lettersInGame = []
+            letterSpeed = 1
+            collidedLetterIndex = -1;
+    
+            /*  Player */
+            playerX = WIDTH / 2
+            playerY = HEIGHT - 30
+            player = new Player(game)
+    
+            /* lasers */
+            laserLoaded = true;
+            lasers = [];
+        }
+    }else{
+        restartGameTime = new Date();
+    }
+
 }
 
 function AnimateGame(){

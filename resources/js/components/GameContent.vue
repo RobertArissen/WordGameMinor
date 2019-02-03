@@ -40,6 +40,13 @@
 
         mounted(){
             this.words = window.words
+
+            EventBus.$on('restartGame', data => {    
+                if(this.gameStarted){
+                    this.restartGame()
+                    console.log('1')
+                }
+            });
         },
 
         methods: {
@@ -47,6 +54,11 @@
                 this.gameStarted = true
                 EventBus.$emit('launchGame', true)
             },
+
+            restartGame(){
+                this.selected = 0,
+                this.gameStarted = false
+            }
         }
     }
 </script>

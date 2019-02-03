@@ -4,7 +4,7 @@ export default class Player {
 
         this.health = 3
         this.playerImage = new Image();
-        this.playerImage.src = "/public/img/player.png"; 
+        this.playerImage.src = "https://cubi.newpenguins.nl/public/img/player.png"; 
     }
 
     draw(x, y){

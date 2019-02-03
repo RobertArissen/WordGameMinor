@@ -35,7 +35,10 @@
             this.hitLetter();
 
             EventBus.$on('restartGame', data => {    
-                this.restartGame()
+                if(this.gameStarted){
+                    this.restartGame()
+                    console.log('3')
+                }
             });
         },
 
@@ -53,6 +56,18 @@
 
                     this.emitActiveWord()
                 });
+            },
+
+            restartGame(){
+                this.gameStarted = false
+                this.score = 0
+                this.playedOut = false
+                this.playerHealth = 3
+
+                this.words = window.words[this.selected].words
+                this.wordIndex = 0
+                this.correctLetters = 0
+                this.activeLetter = 0
             },
 
             emitActiveWord(){
