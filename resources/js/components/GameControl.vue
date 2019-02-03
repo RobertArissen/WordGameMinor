@@ -10,6 +10,8 @@
 
 <script>
     export default {
+        props: ['selected'],
+
         data(){
             return {
                 
@@ -26,11 +28,21 @@
         },
 
         mounted(){
-            this.words = gameWords
+            this.words = window.words[this.selected].words
 
             this.gameStartedBus()
 
             this.hitLetter();
+
+            EventBus.$on('restartGame', data => {    
+                this.restartGame()
+            });
+        },
+
+        watch: { 
+            selected: function(newVal, oldVal) {
+                this.words = window.words[newVal].words
+            }
         },
 
 

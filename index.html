@@ -11,11 +11,63 @@
         <div class="bg-black rounded-t rounded-b shadow-lg" style="width: 720px" id="app">
             <h3 class="text-center my-5 text-white">WordShooter</h3>
 
-            <canvas class="rounded shadow-lg ml-2 "></canvas>
-
-            <game-control/>
+            <game-content/>
         </div>
     </div>
+
+    <script>
+         window.words = [ 
+            {
+                'listName': 'Engels',
+                'key': 'id-1',
+                'words': [{
+                    wordDutch: 'auto',
+                    word: 'car',
+                    languageName: 'engelse',
+                    score: 30
+                },
+                {
+                    wordDutch: 'huis',
+                    word: 'house',
+                    languageName: 'engelse',
+                    score: 30
+                }]
+            },
+            {
+                'listName': 'Duits',
+                'key': 'id-2',
+                'words': [{
+                    wordDutch: 'fiets',
+                    word: 'fahrrad',
+                    languageName: 'duitse',
+                    score: 30
+                },
+                {
+                    wordDutch: 'hond',
+                    word: 'hund',
+                    languageName: 'duitse',
+                    score: 30
+                }]
+            },
+            {
+                'listName': 'Frans',
+                'key': 'id-3',
+                'words': [{
+                    wordDutch: 'trein',
+                    word: 'train',
+                    languageName: 'franse',
+                    score: 30
+                },
+                {
+                    wordDutch: 'hond',
+                    word: 'chien',
+                    languageName: 'franse',
+                    score: 30
+                }]
+            }
+        ];    
+    </script>
+
     <script src="/public/js/app.js"></script>
 
 </body>

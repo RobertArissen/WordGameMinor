@@ -224,6 +224,11 @@ EventBus.$on('score', data => {
     score = data
 });
 
+EventBus.$on('launchGame', data => { 
+    gameStarted = data
+    EventBus.$emit('gameStarted', gameStarted)
+});
+
 
 /* Start Screen Functions */
 function startScreen(){
@@ -272,6 +277,12 @@ function ClearScreen() {
 
 }
 
+function resetGame(){
+    setTimeout(() => {
+        location.reload();
+    }, 2000);
+}
+
 function AnimateGame(){
     
     requestAnimationFrame(AnimateGame)
@@ -284,8 +295,10 @@ function AnimateGame(){
             nextWordScreen()
         }else if(playedOut){
             playedOutScreen()
+            resetGame()
         }else if(player.health === 0){
             gameOverScreen()
+            resetGame()
         }else{
         HandleInput()
         
